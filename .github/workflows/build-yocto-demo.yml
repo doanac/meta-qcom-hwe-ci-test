@@ -11,9 +11,9 @@ env:
 jobs:
   kas-lock:
     if: github.repository == 'sampra2025/meta-qcom-hwe-ci-test'
-    runs-on: 
+    runs-on:
       - codebuild-qComHweDemo-${{ github.run_id }}-${{ github.run_attempt }}
-      
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,7 +31,7 @@ jobs:
   yocto-check-layer:
     needs: kas-lock
     if: github.repository == 'sampra2025/meta-qcom-hwe-ci-test'
-    runs-on: 
+    runs-on:
       - codebuild-qComHweDemo-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
   yocto-patchreview:
     needs: kas-lock
     if: github.repository == 'sampra2025/meta-qcom-hwe-ci-test'
-    runs-on: 
+    runs-on:
       - codebuild-qComHweDemo-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
@@ -75,7 +75,7 @@ jobs:
         machine:
           - qcs6490-rb3gen2-core-kit
           - sa8775p-ride-sx
-    runs-on: 
+    runs-on:
       - codebuild-qComHweDemo-${{ github.run_id }}-${{ github.run_attempt }}
     name: ${{ matrix.machine }}/poky/systemd
     steps:
@@ -95,7 +95,8 @@ jobs:
           export SSTATE_DIR=${CACHE_DIR}/sstate-cache
           export KAS_WORK_DIR=$PWD/../kas
           mkdir $KAS_WORK_DIR
-          kas build ci/mirror.yml:ci/${{ matrix.machine }}.yml
+          chown -R ubuntu:ubuntu ${CACHE_DIR} ./
+          sudo -u ubuntu kas build ci/mirror.yml:ci/${{ matrix.machine }}.yml
 
       - name: Publish image
         run: |
@@ -105,13 +106,13 @@ jobs:
           [ -d $img_dir ] && rm -rf $img_dir
           mv ../kas/build/tmp/deploy/images/${{matrix.machine}} $img_dir
 
-          # Instruct our file server to make these files available for download         
+          # Instruct our file server to make these files available for download
 
   create-output:
     needs: compile
     outputs:
       url: ${{ steps.print-output.outputs.url }}
-    runs-on: 
+    runs-on:
       - codebuild-qComHweDemo-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - name: "Print output"
